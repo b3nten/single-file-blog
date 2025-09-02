@@ -138,8 +138,8 @@ posts/
           fetch(`/posts/${param}.md`, { signal: controller.signal })
             .then((x) => x.text())
             .then(snarkdown)
-            .then(setPost)
             .then((x) => (posts[param] = x))
+            .then(setPost)
             .catch(console.error);
           return () => controller.abort();
         }, [post]);
