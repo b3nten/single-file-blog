@@ -9,7 +9,7 @@
 
 # Cloudflare
 .wrangler.jsonc
-
+.wrangler
 
 # IDE - VSCode
 .vscode/*

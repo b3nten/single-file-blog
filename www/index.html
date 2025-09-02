@@ -52,21 +52,20 @@
           ),
           h("section", {}, [
             h("h2", {}, "Recent Posts"),
-            posts.length > 0
-              ? h(
-                  "ul",
-                  {},
-                  posts.map((post) =>
-                    h("li", { key: post.file }, [
-                      h(
-                        Link,
-                        { href: `/p/${post.file.replace(".md", "")}` },
-                        post.title,
-                      ),
-                    ]),
-                  ),
-                )
-              : h("p", {}, "Loading posts..."),
+            posts.length > 0 &&
+              h(
+                "ul",
+                {},
+                posts.map((post) =>
+                  h("li", { key: post.file }, [
+                    h(
+                      Link,
+                      { href: `/p/${post.file.replace(".md", "")}` },
+                      post.title,
+                    ),
+                  ]),
+                ),
+              ),
           ]),
         ]);
       };
@@ -149,9 +148,10 @@ posts/
       let Post = () => {
         const params = useParams();
         let postData = usePost(params.slug);
-        return postData
-          ? h("article", { dangerouslySetInnerHTML: { __html: postData } })
-          : h("p", {}, "Loading post...");
+        return (
+          postData &&
+          h("article", { dangerouslySetInnerHTML: { __html: postData } })
+        );
       };
 
       let App = (props) =>
