@@ -7,6 +7,10 @@
 .settings/
 *.sublime-workspace
 
+# Cloudflare
+.wrangler.jsonc
+
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json

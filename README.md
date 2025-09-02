@@ -7,7 +7,7 @@ A demo of a blog in a single HTML file using modern JavaScript and zero build to
 1. Clone or download this repository
 2. Serve the files with any static file server:
    ```bash
-   npx serve . -s
+   npx serve www -s
    ```
 3. Visit `http://localhost:3000`
 
