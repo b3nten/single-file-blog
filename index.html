@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "preact": "https://esm.sh/preact@10.27.1/es2022/preact.mjs",
+          "preact/hooks": "https://esm.sh/preact@10.27.1/es2022/hooks.mjs",
+          "wouter": "https://esm.sh/wouter-preact@3.7.1/es2022/wouter-preact.bundle.mjs",
+          "snarkdown": "https://esm.sh/snarkdown@2.0.0/es2022/snarkdown.mjs"
+        }
+      }
+    </script>
+    <script type="module">
+      import { h, render, Fragment } from "preact";
+      import { useEffect, useState } from "preact/hooks";
+      import { Route, Switch, Link, useParams, Redirect } from "wouter";
+      import snarkdown from "snarkdown";
+
+      let usePosts = () => {
+        let [posts, setPosts] = useState([]);
+        useEffect(() => {
+          fetch("/posts/posts.json")
+            .then((x) => x.json())
+            .then(setPosts)
+            .catch(console.error);
+        }, []);
+        return posts;
+      };
+
+      let Home = () => {
+        let posts = usePosts();
+        return h("div", {}, [
+          h("hgroup", {}, [
+            h("h1", {}, "The Single Page Conspiracy"),
+            h("p", {}, "A demo of a zero-build blog in a single html file"),
+          ]),
+          h(
+            "p",
+            {},
+            "This is a demonstration of building a blog in a single HTML file with modern Javascript and no build steps.",
+          ),
+          h("section", {}, [
+            h("h2", {}, "Recent Posts"),
+            posts.length > 0
+              ? h(
+                  "ul",
+                  {},
+                  posts.map((post) =>
+                    h("li", { key: post.file }, [
+                      h(
+                        Link,
+                        { href: `/p/${post.file.replace(".md", "")}` },
+                        post.title,
+                      ),
+                    ]),
+                  ),
+                )
+              : h("p", {}, "Loading posts..."),
+          ]),
+        ]);
+      };
+
+      let About = () => {
+        return h("article", {}, [
+          h("hgroup", {}, [
+            h("h1", {}, "About This Demo"),
+            h("p", {}, "How this single-file blog application works"),
+          ]),
+          h("h3", {}, "Technical Architecture"),
+          h(
+            "p",
+            {},
+            "This is a complete blog application built in a single HTML file demonstrating modern web development without build tools or complex setups.",
+          ),
+          h("h4", {}, "Frontend Stack"),
+          h("ul", {}, [
+            h("li", {}, [
+              h("strong", {}, "Preact"),
+              " - 3KB React alternative for components",
+            ]),
+            h("li", {}, [
+              h("strong", {}, "Wouter"),
+              " - Lightweight client-side routing",
+            ]),
+            h("li", {}, [
+              h("strong", {}, "Pico CSS"),
+              " - Semantic CSS framework for styling",
+            ]),
+            h("li", {}, [
+              h("strong", {}, "Snarkdown"),
+              " - Minimal markdown parser",
+            ]),
+          ]),
+          h("h4", {}, "How It Works"),
+          h("ol", {}, [
+            h("li", {}, "ES modules loaded directly from CDN (no build step)"),
+            h("li", {}, "Import maps for clean dependency names"),
+            h("li", {}, "Client-side routing with Wouter"),
+            h("li", {}, "Posts fetched from JSON file and markdown files"),
+            h("li", {}, "Markdown rendered to HTML with Snarkdown"),
+          ]),
+          h("h4", {}, "File Structure"),
+          h("pre", {}, [
+            h(
+              "code",
+              {},
+              `index.html     # Complete application
+posts/
+  posts.json   # Post metadata
+  *.md         # Individual posts`,
+            ),
+          ]),
+          h("p", {}, [
+            "The entire application is ~100 lines of JavaScript embedded in this HTML file. ",
+            h(Link, { href: "/" }, "Browse the satirical conspiracy posts"),
+            " to see it in action!",
+          ]),
+        ]);
+      };
+
+      let usePost = (param) => {
+        let [post, setPost] = useState("");
+        useEffect(() => {
+          const controller = new AbortController();
+          fetch(`/posts/${param}.md`, { signal: controller.signal })
+            .then((x) => x.text())
+            .then(snarkdown)
+            .then(setPost)
+            .catch(console.error);
+          return () => controller.abort();
+        }, [post]);
+        return post;
+      };
+
+      let Post = () => {
+        const params = useParams();
+        let postData = usePost(params.slug);
+        return postData
+          ? h("article", { dangerouslySetInnerHTML: { __html: postData } })
+          : h("p", {}, "Loading post...");
+      };
+
+      let App = (props) =>
+        h(Fragment, {}, [
+          h("header", { className: "container" }, [
+            h("nav", {}, [
+              h("ul", {}, [
+                h("li", {}, [h(Link, { href: "/" }, "Home")]),
+                h("li", {}, [h(Link, { href: "/about" }, "About")]),
+                h("li", {}, [
+                  h(
+                    "a",
+                    {
+                      href: "https://github.com/b3nten/single-file-blog",
+                      target: "_blank",
+                    },
+                    "GitHub",
+                  ),
+                ]),
+              ]),
+            ]),
+          ]),
+          h("main", { className: "container" }, [
+            h(Switch, {}, [
+              h(Route, { path: "/", component: Home }),
+              h(Route, { path: "/about", component: About }),
+              h(Route, { path: "/p/:slug", component: Post }),
+            ]),
+          ]),
+        ]);
+
+      render(h(App), document.body);
+    </script>
+    <title>Single File Blog</title>
+  </head>
+  <body></body>
+</html>
