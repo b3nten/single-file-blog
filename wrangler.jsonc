@@ -2,7 +2,7 @@
   "name": "single-page-blog",
   "compatibility_date": "2025-09-02",
   "assets": {
-    "directory": "./src",
+    "directory": "./www",
     "not_found_handling": "single-page-application",
   },
 }

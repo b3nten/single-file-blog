@@ -24,11 +24,14 @@
       import { Route, Switch, Link, useParams, Redirect } from "wouter";
       import snarkdown from "snarkdown";
 
+      let postList = [];
+
       let usePosts = () => {
-        let [posts, setPosts] = useState([]);
+        let [posts, setPosts] = useState(postList);
         useEffect(() => {
           fetch("/posts/posts.json")
             .then((x) => x.json())
+            .then((x) => (postList = x))
             .then(setPosts)
             .catch(console.error);
         }, []);
@@ -126,14 +129,17 @@ posts/
         ]);
       };
 
+      let posts = {};
+
       let usePost = (param) => {
-        let [post, setPost] = useState("");
+        let [post, setPost] = useState(posts[param] ?? "");
         useEffect(() => {
           const controller = new AbortController();
           fetch(`/posts/${param}.md`, { signal: controller.signal })
             .then((x) => x.text())
             .then(snarkdown)
             .then(setPost)
+            .then((x) => (posts[param] = x))
             .catch(console.error);
           return () => controller.abort();
         }, [post]);
